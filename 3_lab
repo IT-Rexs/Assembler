@@ -1,0 +1,28 @@
+.686
+include C:\masm32\include\io.asm
+
+.data
+ ;B dw 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+  ;  12, 13, 14, 15, 16
+ B dw 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 65,
+    70, 75, 80, 85, 91
+ Res dw 0  
+
+.code
+start:
+    MOV AX, 0
+    MOV EBX, offset B
+    MOV ECX, 16
+    
+loop_start:
+    mov DX, [EBX]
+    ADD AX, DX
+    ADD BX,2
+    LOOP loop_start
+    
+del_smech:
+    SHR AX, 4; 
+    MOV Res, AX
+    exit
+end start	
+
