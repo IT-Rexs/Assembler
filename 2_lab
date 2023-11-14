@@ -1,0 +1,36 @@
+.data
+ RESULT db 0
+ Res dw 0
+ A dw 784
+ B dw 50
+ S db 25
+
+.code
+start:
+    MOV AX, 216 ; 216
+ADD AX, A ; AX=1000
+MOV CX,AX; CX=1000
+MOV AX, 12
+MUL B; AX=600
+MOV BX,AX; BX=600
+MOV AX,4
+MUL S; AX=100
+SUB BX,AX ; BX=500
+MOV AX,CX; AX=1000
+DIV BX; AX = 2
+ADD AX,133
+ADD Res, AX  
+
+MOV AX, 0000100000000000B
+MOV DX, 2266
+;MOV DX, 1025
+    TEST AX,DX
+    JZ wr
+    MOV RESULT, 1
+    exit
+    
+wr:
+    MOV RESULT, 0
+exit
+end start
+
