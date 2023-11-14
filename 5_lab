@@ -1,0 +1,260 @@
+.686
+include \masm32\include\io.asm
+
+.data
+    kol db 21 ; Количество элементов
+    sum dw 0 ; Сумма
+       
+.code
+; Инициализация на начальном этапе
+start: 
+	mov bx, 12
+	
+;Датчик температуры 1	
+Met1_o:
+          mov eax, 0
+	mov dx, 301h
+	out dx, eax
+	or eax, 20000h
+	out dx, eax
+	mov dx, 300h
+
+Met1_i: 
+    in ax, dx
+    test ax, 8000h ; Проверка ГТ
+    jz Met1_i
+    test ax, 1000000000000000b ; Проверка влажности14 разряда
+    jz main_cap_3 ; Если 1 переход
+    and ax, 0FFFh
+    ADD sum, ax ; Вычисляем сумму
+    mov ax, 0
+
+start_1: ; Проверка итераций в цикле
+    cmp cx, 12
+    je T1_T2_T3_T4_2_o
+    cmp cx, 9
+    je Met3_o
+    cmp cx, 8
+    je Met2_o
+    cmp cx, 6
+    je T1_T3_T4_3_o
+    cmp cx, 4
+    je Met2_o
+    cmp cx, 3
+    je Met3_o
+    
+    jmp DELAY20 ; ; Задержка 20 мс + след итерация
+
+; Датчик температуры 2
+Met2_o:
+    or eax, 4000h  ; + 01 коммутации
+    mov dx, 301h
+    out dx, eax
+    CALL DELAY10; ожидание коммутации 10мс
+    or eax, 20000h ;  Запуск АЦП
+    mov dx, 300h
+
+Met2_i:
+    in ax, dx
+    test ax, 8000h ; Проверка 15р ГТ
+    jz Met2_i
+    test ax, 1000000000000000b ; Проверка влажности
+    jz main_cap_3 ; Если 1 переход
+    and ax, 0FFFh
+    ADD sum, ax ; Вычисляем сумму
+    mov ax, 0
+    jmp DELAY20 ; Задержка 20 мс + след итерация
+
+; Датчик температуры 3
+Met3_o:
+    or eax, 8000h ; + 10 коммутации
+    mov dx, 301h
+    out dx, eax
+    CALL DELAY10;  ожидание коммутации 10мс
+    or eax, 20000h ; Запуск АЦП
+    mov dx, 300h
+
+Met3_i:
+    in ax, dx
+    test ax, 8000h ; Проверка 15р ГТ
+    jz Met2_i
+    test ax, 1000000000000000b ; Проверка влажности
+    jz main_cap_3 ; Если 1 переход
+    and ax, 0FFFh
+    ADD sum, ax 
+    mov ax, 0
+    jmp DELAY20 ; Задержка 20 мс + след итерация
+    
+T1_T2_T3_T4_2_o:
+    or eax, 4000h ; 01 коммутатор
+    mov dx, 301h
+    out dx, eax
+    CALL DELAY10;  
+    or eax, 20000h ; Запуск АЦП
+    mov dx, 300h
+
+T1_T2_T3_T4_2_i:
+    in ax, dx
+    test ax, 8000h ; 
+    jz T1_T2_T3_T4_2_i
+    test ax, 1000000000000000b 
+    jz main_cap_3 
+    and ax, 0FFFh
+    ADD sum, ax
+    mov ax, 0
+
+; Датчик температуры 3
+T1_T2_T3_T4_3_o:
+    or eax, 8000h ; 10 коммутатор
+    mov dx, 301h
+    out dx, eax
+    CALL DELAY10;  
+    or eax, 20000h ; запуск АЦП
+    mov dx, 300h
+
+T1_T2_T3_T4_3_i:
+    in ax, dx
+    test ax, 8000h ; 
+    jz T1_T2_T3_T4_3_i
+    test ax, 1000000000000000b ;
+    jz main_cap_3 ; 
+    and ax, 0FFFh
+    ADD sum, ax ; 
+    mov ax, 0
+  
+; Датчик температуры 4
+T1_T2_T3_T4_4_o:
+    or eax, C000h ; 11 коммутатор
+    mov dx, 301h
+    out dx, eax
+    CALL DELAY10
+    or eax, 20000h ; Запуск АЦП
+    mov dx, 300h
+
+T1_T2_T3_T4_4_i:
+    in ax, dx
+    test ax, 4000h 
+    jz T1_T2_T3_T4_4_i
+    test ax, 1000000000000000b 
+    jz main_cap_3 
+    and ax, 0FFFh
+    ADD sum, ax
+    mov ax, 0
+    jmp DELAY20 
+
+; Датчик температуры 3
+T1_T3_T4_3_o:
+    or eax, 8000h ; 10 коммутатор
+    mov dx, 301h
+    out dx, eax
+    CALL DELAY10
+    or eax, 20000h ; Запуск АЦП
+    mov dx, 300h
+
+T1_T3_T4_3_i:
+    in ax, dx
+    test ax, 8000h 
+    jz T1_T3_T4_3_i
+    test ax, 1000000000000000b 
+    jz main_cap_3 
+    and ax, 0FFFh
+    ADD sum, ax 
+    mov ax, 0
+  
+; Датчик температуры 4
+T1_T3_T4_4_o:
+    or eax, C000h ; 11 коммутатор
+    mov dx, 301h
+    out dx, eax
+    CALL DELAY10
+    or eax, 20000h  ; Запуск АЦП
+    mov dx, 300h
+
+T1_T3_T4_4_i:
+    in ax, dx
+    test ax, 8000h 
+    jz T1_T3_T4_4_i
+    test ax, 1000000000000000b 
+    jz main_cap_3 
+    and ax, 0FFFh
+    ADD sum, ax
+    mov ax, 0
+    jmp DELAY20 
+
+; Конец цикла + поиск среднего
+Loop_next: 
+    dec bx
+    jnz Met1_o
+    
+    MOV AX, sum
+    DIV kol
+    MOV sum, AX
+    jmp main_cap_1
+ 
+   ;Третий режим работы
+main_cap_3:
+    mov dx,301h
+    mov eax, 3EB8h
+    or eax,10000h ; Запуск ЦАП
+    out dx, eax
+    jmp start
+;Первый режим работы
+main_cap_1:
+    mov edx,301h
+    cmp eax, 933h ;Сравнение с контрольным значением
+    jge main_cap_2 ; если больше или равно 20
+    mov eax,1333h
+    or eax,10000h ; Запуск ЦАП
+    out dx, eax
+    jmp start
+    ;Второй режим работы
+main_cap_2:  
+    mov eax, 31EBh
+    or eax,10000h ; Запуск ЦАП
+    out dx, eax
+    jmp start
+    
+; Задержка 10мс
+DELAY10: 
+    MOV SI, 50
+L1: MOV CX,19436
+    MOV SI, SI
+    NOP 
+    NOP 
+    NOP
+    NOP
+L2: 
+    NOP 
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    LOOP L2
+    DEC SI 
+    JNZ L1 
+    RET 
+    
+
+
+; Задержка 20мс
+DELAY20: 
+    MOV SI, 100
+L20_1: MOV CX,19436
+    MOV SI, SI
+    NOP 
+    NOP 
+    NOP
+    NOP
+L20_2: 
+    NOP 
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    LOOP L20_2
+    DEC SI 
+    JNZ L20_1
+    jmp Loop_next ; переход на след итерацию
+end start
