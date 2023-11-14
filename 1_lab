@@ -1,0 +1,16 @@
+
+.data
+    I1_DB db 202
+    I1_DW dw 202
+    I1_DD dd 202
+    
+    I2_DW dw -130
+    I2_DD dd -130
+
+.code
+start:
+    mov BX,I2_DW
+    mov EBP, offset I1_DW
+    mov [EBP], BX
+    exit
+end start
