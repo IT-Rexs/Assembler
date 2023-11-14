@@ -1,0 +1,67 @@
+.data
+    A dw 0, 0, 0, 0, 0, 0, 0, 0, 0, 0; массивы из 10 элементов
+    B db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    
+.code
+; Инициализация на начальном этапе
+start: 
+    MOV EBX, offset A
+	MOV ESP, offset B
+    MOV DH, 11010000b ; Cтарший U_0 = D0h 
+    MOV ECX, 10 ; N=10
+    
+MAIN:  
+    MOV AH, 178 ; 178 - 10110010 00000000, Rc=15. Вместо нее - IN AH, 089h
+    TEST AH, 10000000b ; Проверка 15 разряда
+    JZ MAIN
+    ; Проверка четности, этап модификации
+    TEST CX, 00000001b
+    JZ CHET_FUNK 
+    MOV DL, 01000100b ; S_R = 2,6
+    JMP OUT_DELAY 
+    
+CHET_FUNK:MOV DL, 00000001b ; R_S = 0
+    
+  ; Сохранение значений в регистр BP,AX и вызов DELAY. Этап вывода + DELAY
+OUT_DELAY: 
+    ;OUT 08Ah, DX
+    MOV BP, DX 
+    MOV AX, CX
+    JMP DELAY
+    
+  ; Этапы ввода состояний, сохранения в массивы и приращения   
+MAIN_MASS:
+    MOV CX, AX
+    MOV DX, BP
+    MOV AX, 1 ; Вместо IN AX, 089h
+    ;  Работа с массивами
+    MOV [EBX], DX
+	MOV [ESP], AL
+    ADD EBX, 2 
+	INC ESP
+    ADD DH, 04h ; приращение
+    LOOP MAIN
+    JMP EXIT
+    
+DELAY: 
+    MOV DX, 510
+L1: MOV CX,42302
+    MOV DX, DX
+    NOP 
+    NOP 
+    NOP
+    NOP
+L2: 
+    NOP 
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    LOOP L2
+    DEC DX 
+    JNZ L1 
+    JMP MAIN_MASS 
+
+EXIT:
+end start
